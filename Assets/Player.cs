@@ -5,7 +5,13 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     public float moveSpeed;
+    public float jump;
     public Rigidbody2D rb;
+    private float movingInput;
+
+    public LayerMask whatIsGround;
+    public float groundCheckDistance;
+    private bool isGrounded;
     
     // Start is called before the first frame update
     void Start()
@@ -16,6 +22,15 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        rb.velocity = new Vector2(moveSpeed * Input.GetAxis("Horizontal"),rb.velocity.y);
+        isGrounded = Physics2D.Raycast(transform.position,Vector2.down,groundCheckDistance,whatIsGround);
+        
+        movingInput = Input.GetAxisRaw("Horizontal");
+
+        if(Input.GetKeyDown(KeyCode.Space)){
+            rb.velocity = new Vector2(rb.velocity.x,jump);
+        }
+        rb.velocity = new Vector2(moveSpeed * movingInput ,rb.velocity.y);
     }
+
+    
 }
