@@ -5,14 +5,20 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     // Variables for controlling player movement and physics
+    private Rigidbody2D rb; // Reference to the player's Rigidbody component
+    
+    private Animator anim;
+
+    [Header("movement info")]
     public float moveSpeed; // Speed at which the player moves horizontally
     public float jumpPower; // add a jump power in player script
-    public Rigidbody2D rb; // Reference to the player's Rigidbody component
 
     [SerializeField]private bool canDoubleJump;
     [SerializeField]private float movingInput; // Input value for horizontal movement
 
     // Variables for checking ground collision
+
+    [Header("Collision info")]
     public LayerMask whatIsGround; // Layer mask for identifying ground
     public float groundCheckDistance; // Distance to check for ground collision
     [SerializeField]private bool isGrounded; // check if the player is grounded
@@ -20,23 +26,19 @@ public class Player : MonoBehaviour
     
     void Start()
     {
-        
+        rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
     }
 
     void Update()
     {
+        bool isMoving = rb.velocity.x != 0;
+
+        anim.SetBool("isMoving",isMoving);
         // Check for ground collision
         collisionCheck();
         
-        // Read horizontal movement input from player
-        movingInput = Input.GetAxisRaw("Horizontal");
-
-        // Check if the player pressed the jump button
-        if(Input.GetKeyDown(KeyCode.Space)){
-
-            // If the player is grounded, allow them to jump
-            JumpButton();
-        }
+        InputChecks();
 
         if(isGrounded)
         {
@@ -45,6 +47,18 @@ public class Player : MonoBehaviour
 
         // Move the player horizontally
         Move();
+    }
+
+    private void InputChecks()
+    {
+        movingInput = Input.GetAxisRaw("Horizontal");
+
+        // Check if the player pressed the jump button
+        if(Input.GetKeyDown(KeyCode.Space)){
+
+            // If the player is grounded, allow them to jump
+            JumpButton();
+        }
     }
 
     private void JumpButton()
