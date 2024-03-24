@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -28,6 +29,8 @@ public class Player : MonoBehaviour
 
     public float wallCheckDistance;
     private bool isWallDetected;
+    private bool canWallSlide;
+    private bool isWallSliding;
     
    
     void Start()
@@ -51,6 +54,16 @@ public class Player : MonoBehaviour
             canDoubleJump = true;
         }
 
+        if(canWallSlide)
+        {
+            isWallSliding = true;
+            rb.velocity =new Vector2(rb.velocity.x,rb.velocity.y * 0.1f);
+        }
+
+        if(!isWallDetected)
+            
+            isWallSliding = false;
+
         // Move the player horizontally
         Move();
     }
@@ -62,11 +75,17 @@ public class Player : MonoBehaviour
         anim.SetBool("isMoving",isMoving);
         anim.SetFloat("yVelocity",rb.velocity.y);
         anim.SetBool("isGrounded",isGrounded);
+        anim.SetBool("isWallSliding",isWallSliding);
     }
 
     private void InputChecks()
     {
         movingInput = Input.GetAxisRaw("Horizontal");
+
+        if(Input.GetAxis("Vertical") < 0)
+        {
+            canWallSlide = false;
+        }
 
         // Check if the player pressed the jump button
         if(Input.GetKeyDown(KeyCode.Space)){
@@ -128,6 +147,17 @@ public class Player : MonoBehaviour
         // If the ray hits an object in the whatIsGround layer mask within the specified distance, set isGrounded to true
         isGrounded = Physics2D.Raycast(transform.position,Vector2.down,groundCheckDistance,whatIsGround);
         isWallDetected = Physics2D.Raycast(transform.position,Vector2.right * facingDirection , wallCheckDistance ,whatIsGround);
+
+        if(isWallDetected && rb.velocity.y < 0)
+        {
+            canWallSlide = true;
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawLine(transform.position,new Vector3(transform.position.x,transform.position.y - groundCheckDistance));
+        Gizmos.DrawLine(transform.position,new Vector3(transform.position.x + wallCheckDistance * facingDirection, transform.position.y));
     }
 
     
