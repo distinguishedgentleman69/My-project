@@ -15,9 +15,11 @@ public class Player : MonoBehaviour
     public float jumpPower; // add a jump power in player script
 
     [SerializeField]private bool canDoubleJump;
+
+    private bool canMove;
     [SerializeField]private float movingInput; // Input value for horizontal movement
 
-     private bool FacingRight = true;
+     private bool facingRight = true;
     private int facingDirection = 1;
 
     // Variables for checking ground collision
@@ -52,6 +54,7 @@ public class Player : MonoBehaviour
         if(isGrounded)
         {
             canDoubleJump = true;
+            canMove = true;
         }
 
         if(canWallSlide)
@@ -97,7 +100,11 @@ public class Player : MonoBehaviour
 
     private void JumpButton()
     {
-        if(isGrounded)
+        if(isWallSliding)
+        {
+            WallJump();
+        }
+        else if(isGrounded)
         {
             Jump();
         }
@@ -108,10 +115,17 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void WallJump()
+    {
+        canMove = false;
+        rb.velocity = new Vector2(5 * -facingDirection, jumpPower);
+    }
+
     // Function to handle horizontal movement
     private void Move()
     {
          // Set the player's velocity based on the input and current velocity
+         if(canMove)
          rb.velocity = new Vector2(moveSpeed * movingInput ,rb.velocity.y);
     }
 
@@ -124,11 +138,11 @@ public class Player : MonoBehaviour
 
     private void FlipController()
     {
-        if(FacingRight && movingInput < 0)
+        if(facingRight && movingInput < 0)
         {
             Flip();
         }
-        else if (!FacingRight && movingInput > 0)
+        else if (!facingRight && movingInput > 0)
         {
             Flip();
         }
@@ -137,8 +151,8 @@ public class Player : MonoBehaviour
     private void Flip()
     {
         facingDirection = facingDirection * -1;
-        FacingRight = !FacingRight;
-        transform.Rotate(0,180,0);
+        facingRight = !facingRight;
+        transform.Rotate(0, 180, 0);
     }
     // Function to check for ground collision
     private void CollisionCheck()
@@ -151,6 +165,11 @@ public class Player : MonoBehaviour
         if(isWallDetected && rb.velocity.y < 0)
         {
             canWallSlide = true;
+        }
+
+        if(!isWallDetected)
+        {
+            isWallSliding = false;
         }
     }
 
