@@ -22,6 +22,8 @@ public class Player : MonoBehaviour
      private bool facingRight = true;
     private int facingDirection = 1;
 
+    public Vector2 wallJumpDirection;
+
     // Variables for checking ground collision
 
     [Header("Collision info")]
@@ -33,6 +35,7 @@ public class Player : MonoBehaviour
     private bool isWallDetected;
     private bool canWallSlide;
     private bool isWallSliding;
+
     
    
     void Start()
@@ -44,7 +47,6 @@ public class Player : MonoBehaviour
     void Update()
     {
         AnimationControllers();
-        // Check for ground collision
         CollisionCheck();
         FlipController();
         
@@ -63,9 +65,6 @@ public class Player : MonoBehaviour
             rb.velocity =new Vector2(rb.velocity.x,rb.velocity.y * 0.1f);
         }
 
-        if(!isWallDetected)
-            
-            isWallSliding = false;
 
         // Move the player horizontally
         Move();
@@ -78,6 +77,7 @@ public class Player : MonoBehaviour
         anim.SetBool("isMoving",isMoving);
         anim.SetFloat("yVelocity",rb.velocity.y);
         anim.SetBool("isGrounded",isGrounded);
+        anim.SetBool("isWallDetected",isWallDetected);
         anim.SetBool("isWallSliding",isWallSliding);
     }
 
@@ -113,12 +113,14 @@ public class Player : MonoBehaviour
             canDoubleJump = false;
             Jump();
         }
+
+        canWallSlide = false;
     }
 
     private void WallJump()
     {
         canMove = false;
-        rb.velocity = new Vector2(5 * -facingDirection, jumpPower);
+        rb.velocity = new Vector2(wallJumpDirection.x * -facingDirection, wallJumpDirection.y);
     }
 
     // Function to handle horizontal movement
@@ -138,11 +140,11 @@ public class Player : MonoBehaviour
 
     private void FlipController()
     {
-        if(facingRight && movingInput < 0)
+        if(facingRight && rb.velocity.x < -0.1f)
         {
             Flip();
         }
-        else if (!facingRight && movingInput > 0)
+        else if (!facingRight && rb.velocity.x > 0.1f)
         {
             Flip();
         }
@@ -150,7 +152,7 @@ public class Player : MonoBehaviour
 
     private void Flip()
     {
-        facingDirection = facingDirection * -1;
+        facingDirection = facingDirection *-1;
         facingRight = !facingRight;
         transform.Rotate(0, 180, 0);
     }
@@ -167,10 +169,14 @@ public class Player : MonoBehaviour
             canWallSlide = true;
         }
 
-        if(!isWallDetected)
+         if(!isWallDetected)
         {
             isWallSliding = false;
+            canWallSlide = false;
+            
         }
+
+
     }
 
     private void OnDrawGizmos()
