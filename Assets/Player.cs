@@ -103,6 +103,7 @@ public class Player : MonoBehaviour
         if(isWallSliding)
         {
             WallJump();
+            canDoubleJump = true;
         }
         else if(isGrounded)
         {
@@ -110,6 +111,7 @@ public class Player : MonoBehaviour
         }
         else if(canDoubleJump)
         {
+            canMove = true;
             canDoubleJump = false;
             Jump();
         }
