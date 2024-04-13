@@ -19,6 +19,8 @@ public class Player : MonoBehaviour
     private bool canMove;
     [SerializeField]private float movingInput; // Input value for horizontal movement
 
+    
+
      private bool facingRight = true;
     private int facingDirection = 1;
 
@@ -36,6 +38,14 @@ public class Player : MonoBehaviour
     private bool canWallSlide;
     private bool isWallSliding;
 
+    [Header("Knockback Info")]
+    [SerializeField] private Vector2 knockbackDir;
+    private bool isKnocked;
+
+    [SerializeField] private float knockbackTime;
+    private bool canBeKnocked = true;
+    [SerializeField] private float knockbackProtectTime;
+
     
    
     void Start()
@@ -47,6 +57,12 @@ public class Player : MonoBehaviour
     void Update()
     {
         AnimationControllers();
+
+        if(isKnocked)
+        {
+            return;
+        }
+
         CollisionCheck();
         FlipController();
         
@@ -79,6 +95,7 @@ public class Player : MonoBehaviour
         anim.SetBool("isGrounded",isGrounded);
         anim.SetBool("isWallDetected",isWallDetected);
         anim.SetBool("isWallSliding",isWallSliding);
+        anim.SetBool("isKnocked",isKnocked);
     }
 
     private void InputChecks()
@@ -117,6 +134,29 @@ public class Player : MonoBehaviour
         }
 
         canWallSlide = false;
+    }
+
+    public void Knockback(int direction)
+    {
+        if(!canBeKnocked)
+        {
+            return;
+        }
+        canBeKnocked = false;
+        isKnocked = true;
+        rb.velocity = new Vector2(knockbackDir.x * direction,knockbackDir.y);
+        Invoke("CancelKnockback", knockbackTime);
+        Invoke("allowKnockback",knockbackProtectTime);
+    }
+
+    private void CancelKnockback()
+    {
+        isKnocked = false;
+    }
+
+    private void allowKnockback()
+    {
+        canBeKnocked = true;
     }
 
     private void WallJump()
